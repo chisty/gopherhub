@@ -8,4 +8,5 @@ tidy:
 	go mod tidy
 	go mod vendor
 
-
+direnv:
+	direnv allow .
