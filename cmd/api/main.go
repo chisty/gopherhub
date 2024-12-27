@@ -11,6 +11,6 @@ func main() {
 		config: cfg,
 	}
 
-	log.Fatal(app.run())
+	log.Fatal(app.run(app.mux()))
 
 }
