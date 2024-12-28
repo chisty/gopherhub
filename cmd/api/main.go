@@ -13,7 +13,7 @@ func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":8080"),
 		db: dbConfig{
-			addr:         env.GetString("DB_ADDR", "postgresql://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
+			addr:         env.GetString("DB_ADDR", "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 20),
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 20),
 			maxIdleTime:  env.GetDuration("DB_MAX_IDLE_TIME", 10*time.Minute),
@@ -24,6 +24,8 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
+
+	defer db.Close()
 
 	storage := store.NewStorage(db)
 
