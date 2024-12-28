@@ -5,16 +5,26 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/chisty/gopherhub/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 type app struct {
 	config config
+	store  store.Storage
 }
 
 type config struct {
 	addr string
+	db   dbConfig
+}
+
+type dbConfig struct {
+	addr         string
+	maxOpenConns int
+	maxIdleConns int
+	maxIdleTime  time.Duration
 }
 
 func (app *app) mux() http.Handler {
@@ -43,7 +53,7 @@ func (app *app) run(mux http.Handler) error {
 		Handler:      mux,
 		WriteTimeout: time.Second * 30,
 		ReadTimeout:  time.Second * 10,
-		IdleTimeout:  time.Minute * 1,
+		IdleTimeout:  time.Minute * 15,
 	}
 
 	log.Println("Server is listening on", app.config.addr)
