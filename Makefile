@@ -1,3 +1,6 @@
+include .envrc
+MIGRATIONS_PATH=./cmd/db/migrations
+
 run:
 	go run cmd/api/*.go
 
@@ -11,14 +14,21 @@ tidy:
 direnv:
 	direnv allow .
 
-db-up:
-	migrate -path=./cmd/db/migrations -database "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable" up
 
-db-down:
-	migrate -path=./cmd/db/migrations -database "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable" down
+migration:
+	migrate create -seq -ext sql -dir $(MIGRATIONS_PATH) $(filter-out $@,$(MAKECMDGOALS))
+
+migrate-up:
+	migrate -path=$(MIGRATIONS_PATH) -database=$(DB_ADDR) up
+
+migrate-down:
+	migrate -path=$(MIGRATIONS_PATH) -database=$(DB_ADDR) down
 
 
 install:
 	brew install direnv
 	brew install golang-migrate
 	go install github.com/air-verse/air@latest
+
+
+.PHONY: run curl tidy direnv migration migrate-up migrate-down install
