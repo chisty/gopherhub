@@ -49,9 +49,11 @@ func (app *app) mux() http.Handler {
 			r.Post("/", app.createPostHandler)
 
 			r.Route("/{id}", func(r chi.Router) {
-				r.Get("/", app.getPostHandler)
+				r.Use(app.postContextMiddleware)
 
+				r.Get("/", app.getPostHandler)
 				r.Delete("/", app.deletePostHandler)
+				r.Patch("/", app.updatePostHandler)
 			})
 		})
 	})
