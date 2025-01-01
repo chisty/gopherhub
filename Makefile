@@ -31,4 +31,8 @@ install:
 	go install github.com/air-verse/air@latest
 
 
-.PHONY: run curl tidy direnv migration migrate-up migrate-down install
+seed:
+	go run cmd/db/seed/main.go
+
+
+.PHONY: run curl tidy direnv migration migrate-up migrate-down install seed
