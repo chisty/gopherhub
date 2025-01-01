@@ -54,6 +54,8 @@ func (app *app) mux() http.Handler {
 				r.Get("/", app.getPostHandler)
 				r.Delete("/", app.deletePostHandler)
 				r.Patch("/", app.updatePostHandler)
+
+				r.Post("/comments", app.createCommentHandler)
 			})
 		})
 	})

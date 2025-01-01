@@ -30,3 +30,18 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 
 	return nil
 }
+
+func (s *UserStore) GetByUsername(ctx context.Context, username string) (*User, error) {
+	query := `SELECT id, username, email, created_at FROM users WHERE username = $1`
+
+	ctx, cancel := context.WithTimeout(ctx, DBTimeoutDuration)
+	defer cancel()
+
+	var user User
+	err := s.db.QueryRowContext(ctx, query, username).Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
