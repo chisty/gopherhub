@@ -29,3 +29,11 @@ func writeJSONError(w http.ResponseWriter, code int, msg string) error {
 	return writeJSON(w, code, &errorResponse{Error: msg})
 
 }
+
+func (app *app) jsonResponse(w http.ResponseWriter, code int, data any) error {
+	type envelope struct {
+		Data any `json:"data"`
+	}
+
+	return writeJSON(w, code, &envelope{Data: data})
+}
