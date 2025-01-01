@@ -9,20 +9,21 @@ import (
 )
 
 type Post struct {
-	ID        int64    `json:"id"`
-	Title     string   `json:"title"`
-	Content   string   `json:"content"`
-	UserID    int64    `json:"user_id"`
-	Tags      []string `json:"tags"`
-	CreatedAt string   `json:"created_at"`
-	UpdatedAt string   `json:"updated_at"`
+	ID        int64     `json:"id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	UserID    int64     `json:"user_id"`
+	Tags      []string  `json:"tags"`
+	CreatedAt string    `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
+	Comments  []Comment `json:"comments"`
 }
 
-type PostsStore struct {
+type PostStore struct {
 	db *sql.DB
 }
 
-func (s *PostsStore) Create(ctx context.Context, post *Post) error {
+func (s *PostStore) Create(ctx context.Context, post *Post) error {
 	query := `INSERT INTO posts (title, content, user_id, tags) VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at`
 
 	err := s.db.QueryRowContext(ctx, query, post.Title, post.Content, post.UserID,
@@ -35,7 +36,7 @@ func (s *PostsStore) Create(ctx context.Context, post *Post) error {
 	return nil
 }
 
-func (s *PostsStore) GetByID(ctx context.Context, id int64) (*Post, error) {
+func (s *PostStore) GetByID(ctx context.Context, id int64) (*Post, error) {
 	query := `SELECT id, title, content, user_id, tags, created_at, updated_at FROM posts WHERE id = $1`
 
 	var post Post
