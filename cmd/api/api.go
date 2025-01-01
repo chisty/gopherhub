@@ -50,6 +50,8 @@ func (app *app) mux() http.Handler {
 
 			r.Route("/{id}", func(r chi.Router) {
 				r.Get("/", app.getPostHandler)
+
+				r.Delete("/", app.deletePostHandler)
 			})
 		})
 	})
