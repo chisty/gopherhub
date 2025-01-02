@@ -8,7 +8,7 @@ import (
 func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("getUserFeedHandler")
 
-	posts, err := app.store.Posts.GetUserFeed(r.Context())
+	posts, err := app.store.Posts.GetUserFeed(r.Context(), int64(10))
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

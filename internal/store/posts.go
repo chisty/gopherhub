@@ -113,7 +113,7 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 func (s *PostStore) GetUserFeed(ctx context.Context, userID int64) ([]PostWithMetadata, error) {
 
 	query := `SELECT p.id, p.title, p.content, p.user_id, p.tags, p.version, p.created_at,
-			u.username, u.email,
+			u.username,
 			COUNT(c.id) AS comments_count 
 			FROM posts p 
 			LEFT JOIN comments c ON p.id = c.post_id
@@ -138,7 +138,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, userID int64) ([]PostWithMe
 		var detailPost PostWithMetadata
 		err := rows.Scan(&detailPost.ID, &detailPost.Title, &detailPost.Content, &detailPost.UserID,
 			pq.Array(&detailPost.Tags), &detailPost.Version, &detailPost.CreatedAt, &detailPost.User.Username,
-			&detailPost.User.Email, &detailPost.CommentsCount)
+			&detailPost.CommentsCount)
 		if err != nil {
 			return nil, err
 		}
