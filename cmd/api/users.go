@@ -49,6 +49,28 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("unfollowUserHandler")
+
+	followerUser := getUserFromContext(r)
+
+	// TODO: implement auth userID from context
+	var payload FollowUser
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if err := app.store.Followers.UnFollow(r.Context(), payload.UserID, followerUser.ID); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
+		app.internalServerError(w, r, err)
+	}
+}
+
 func (app *app) userContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
