@@ -3,7 +3,6 @@ package store
 import (
 	"context"
 	"database/sql"
-	"errors"
 
 	"github.com/lib/pq"
 )
@@ -50,8 +49,8 @@ func (s *PostStore) GetByID(ctx context.Context, id int64) (*Post, error) {
 	err := s.db.QueryRowContext(ctx, query, id).Scan(
 		&post.ID, &post.Title, &post.Content, &post.UserID, pq.Array(&post.Tags), &post.Version, &post.CreatedAt, &post.UpdatedAt)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
+		switch err {
+		case sql.ErrNoRows:
 			return nil, ErrNotFound
 		default:
 			return nil, err
@@ -94,8 +93,8 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 
 	err := s.db.QueryRowContext(ctx, query, post.Title, post.Content, post.ID, post.Version).Scan(&post.Version)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
+		switch err {
+		case sql.ErrNoRows:
 			return ErrNotFound
 		default:
 			return err

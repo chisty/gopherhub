@@ -23,6 +23,7 @@ type Storage struct {
 	Users interface {
 		Create(context.Context, *User) error
 		GetByUsername(ctx context.Context, username string) (*User, error)
+		GetByID(ctx context.Context, id int64) (*User, error)
 	}
 
 	Comments interface {

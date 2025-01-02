@@ -58,6 +58,12 @@ func (app *app) mux() http.Handler {
 				r.Post("/comments", app.createCommentHandler)
 			})
 		})
+
+		r.Route("/users", func(r chi.Router) {
+			r.Route("/{id}", func(r chi.Router) {
+				r.Get("/", app.getUserHandler)
+			})
+		})
 	})
 
 	return r

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -32,7 +31,6 @@ type CreateCommentRequest struct {
 }
 
 func (app *app) createPostHandler(w http.ResponseWriter, r *http.Request) {
-
 	log.Println("createPostHandler")
 
 	ctx := r.Context()
@@ -93,11 +91,13 @@ func (app *app) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.store.Posts.Delete(r.Context(), id); err != nil {
-		switch {
-		case errors.Is(err, store.ErrNotFound):
+		switch err {
+		case store.ErrNotFound:
 			app.notFoundResponse(w, r, err)
+			return
 		default:
 			app.internalServerError(w, r, err)
+			return
 		}
 	}
 
@@ -127,11 +127,13 @@ func (app *app) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.store.Posts.Update(r.Context(), post); err != nil {
-		switch {
-		case errors.Is(err, store.ErrNotFound):
+		switch err {
+		case store.ErrNotFound:
 			app.notFoundResponse(w, r, err)
+			return
 		default:
 			app.internalServerError(w, r, err)
+			return
 		}
 	}
 
@@ -189,14 +191,14 @@ func (app *app) postContextMiddleware(next http.Handler) http.Handler {
 
 		post, err := app.store.Posts.GetByID(r.Context(), id)
 		if err != nil {
-			switch {
-			case errors.Is(err, store.ErrNotFound):
+			switch err {
+			case store.ErrNotFound:
 				app.notFoundResponse(w, r, err)
+				return
 			default:
 				app.internalServerError(w, r, err)
+				return
 			}
-
-			return
 		}
 
 		ctx := context.WithValue(r.Context(), postKeyCtx, post)
