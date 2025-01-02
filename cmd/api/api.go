@@ -61,7 +61,13 @@ func (app *app) mux() http.Handler {
 
 		r.Route("/users", func(r chi.Router) {
 			r.Route("/{id}", func(r chi.Router) {
+				r.Use(app.userContextMiddleware)
+
 				r.Get("/", app.getUserHandler)
+
+				// We can use POST or PUT, but PUT is more appropriate since it is idempotent
+				r.Put("/follow", app.followUserHandler)
+				r.Put("/unfollow", app.unfollowUserHandler)
 			})
 		})
 	})
