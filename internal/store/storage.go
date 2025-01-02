@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	ErrNotFound       = errors.New("record not found")
-	DBTimeoutDuration = 5 * time.Second
+	ErrNotFound               = errors.New("record not found")
+	ErrorConflictDuplicateKey = errors.New("conflict: resource already exists")
+	DBTimeoutDuration         = 5 * time.Second
 )
 
 type Storage struct {

@@ -40,8 +40,14 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.store.Followers.Follow(r.Context(), payload.UserID, followerUser.ID); err != nil {
-		app.internalServerError(w, r, err)
-		return
+		switch err {
+		case store.ErrorConflictDuplicateKey:
+			app.conflictResponse(w, r, err)
+			return
+		default:
+			app.internalServerError(w, r, err)
+			return
+		}
 	}
 
 	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
