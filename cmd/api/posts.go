@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/chisty/gopherhub/internal/store"
+	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -36,7 +37,7 @@ func (app *app) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var createPostPayload CreatePostRequest
-	if err := readJSON(w, r, &createPostPayload); err != nil {
+	if err := util.ReadJSON(w, r, &createPostPayload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -108,7 +109,7 @@ func (app *app) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromContext(r)
 
 	var updatePostPayload UpdatePostRequest
-	if err := readJSON(w, r, &updatePostPayload); err != nil {
+	if err := util.ReadJSON(w, r, &updatePostPayload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -148,7 +149,7 @@ func (app *app) createCommentHandler(w http.ResponseWriter, r *http.Request) {
 	post := getPostFromContext(r)
 
 	var createCommentPayload CreateCommentRequest
-	if err := readJSON(w, r, &createCommentPayload); err != nil {
+	if err := util.ReadJSON(w, r, &createCommentPayload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}

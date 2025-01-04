@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/chisty/gopherhub/internal/store"
+	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -34,7 +35,7 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement auth userID from context
 	followerUser := getUserFromContext(r)
 	var payload FollowUser
-	if err := readJSON(w, r, &payload); err != nil {
+	if err := util.ReadJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -62,7 +63,7 @@ func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: implement auth userID from context
 	var payload FollowUser
-	if err := readJSON(w, r, &payload); err != nil {
+	if err := util.ReadJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}

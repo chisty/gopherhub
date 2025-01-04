@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/chisty/gopherhub/internal/store"
+	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -91,4 +92,12 @@ func (app *app) run(mux http.Handler) error {
 	log.Println("Server is listening on", app.config.addr)
 
 	return srv.ListenAndServe()
+}
+
+func (app *app) jsonResponse(w http.ResponseWriter, code int, data any) error {
+	type envelope struct {
+		Data any `json:"data"`
+	}
+
+	return util.WriteJSON(w, code, &envelope{Data: data})
 }
