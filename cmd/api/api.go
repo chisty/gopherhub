@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -9,6 +10,9 @@ import (
 	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.comn/chisty/gopherhub/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 type app struct {
@@ -46,6 +50,11 @@ func (app *app) mux() http.Handler {
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", app.healthCheckHandler)
 
+		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL(swaggerURL),
+		))
+
 		r.Route("/posts", func(r chi.Router) {
 			r.Post("/", app.createPostHandler)
 
@@ -81,6 +90,10 @@ func (app *app) mux() http.Handler {
 }
 
 func (app *app) run(mux http.Handler) error {
+
+	// Docs
+	docs.SwaggerInfo.Version = version
+
 	srv := &http.Server{
 		Addr:         app.config.addr,
 		Handler:      mux,

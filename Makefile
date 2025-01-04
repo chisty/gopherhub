@@ -35,4 +35,8 @@ seed:
 	go run cmd/db/seed/main.go
 
 
-.PHONY: run curl tidy direnv migration migrate-up migrate-down install seed
+gen-docs:
+	swag init -g ./api/main.go -d cmd,internal && swag fmt
+
+
+.PHONY: run curl tidy direnv migration migrate-up migrate-down install seed gen-docs

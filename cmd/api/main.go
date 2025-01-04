@@ -9,6 +9,25 @@ import (
 	"github.com/chisty/gopherhub/internal/store"
 )
 
+//	@title			GopherHub API
+//	@version		1.0
+//	@description	API for GopherHub, a social network for gophers.
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@BasePath					/v1
+//
+//	@securityDefinitions.apiKey	ApiKeyAuth
+//	@in							header
+//	@name						Authorization
+//	@description				JWT Authorization header
+
 func main() {
 	cfg := config{
 		addr: env.GetString("ADDR", ":8080"),
