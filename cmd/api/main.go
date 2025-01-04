@@ -28,9 +28,12 @@ import (
 //	@name						Authorization
 //	@description				JWT Authorization header
 
+const version = "0.0.1"
+
 func main() {
 	cfg := config{
-		addr: env.GetString("ADDR", ":8080"),
+		addr:   env.GetString("ADDR", ":8080"),
+		apiURL: env.GetString("DOCS_URL", "localhost:8080"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 20),
@@ -38,7 +41,7 @@ func main() {
 			maxIdleTime:  env.GetDuration("DB_MAX_IDLE_TIME", 10*time.Minute),
 		},
 		env:     env.GetString("ENV", "development"),
-		version: env.GetString("VERSION", "0.0.1"),
+		version: env.GetString("VERSION", version),
 	}
 
 	db, err := db.New(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)

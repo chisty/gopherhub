@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/chisty/gopherhub/docs"
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.comn/chisty/gopherhub/docs"
 
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
@@ -25,6 +25,7 @@ type config struct {
 	db      dbConfig
 	env     string
 	version string
+	apiURL  string
 }
 
 type dbConfig struct {
@@ -93,6 +94,8 @@ func (app *app) run(mux http.Handler) error {
 
 	// Docs
 	docs.SwaggerInfo.Version = version
+	docs.SwaggerInfo.Host = app.config.apiURL
+	docs.SwaggerInfo.BasePath = "/v1"
 
 	srv := &http.Server{
 		Addr:         app.config.addr,
