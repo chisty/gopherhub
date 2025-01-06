@@ -1,4 +1,16 @@
 basePath: /v1
+definitions:
+  store.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
 info:
   contact:
     email: support@swagger.io
@@ -11,7 +23,39 @@ info:
   termsOfService: http://swagger.io/terms/
   title: GopherHub API
   version: "1.0"
-paths: {}
+paths:
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.User'
+        "400":
+          description: Bad Request
+          schema: {}
+        "404":
+          description: Not Found
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get user by ID
+      tags:
+      - users
 securityDefinitions:
   ApiKeyAuth:
     description: JWT Authorization header

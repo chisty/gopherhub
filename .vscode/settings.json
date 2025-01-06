@@ -3,5 +3,6 @@
         "chisty",
         "gopherhub",
         "unfollow"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }

@@ -19,6 +19,20 @@ type FollowUser struct {
 	UserID int64 `json:"user_id" validate:"required"`
 }
 
+// GetUser          godoc
+//
+//	@Summary		Get user by ID
+//	@Description	Get user by ID
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int	true	"User ID"
+//	@Success		200	{object}	store.User
+//	@Failure		400	{object}	error
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/users/{id} [get]
 func (app *app) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("getUserHandler")
 
