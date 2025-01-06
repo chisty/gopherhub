@@ -16,6 +16,24 @@ definitions:
     - content
     - title
     type: object
+  main.RegisterUserRequest:
+    properties:
+      email:
+        maxLength: 255
+        type: string
+      password:
+        maxLength: 40
+        minLength: 4
+        type: string
+      username:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
   main.UpdatePostRequest:
     properties:
       content:
@@ -120,6 +138,34 @@ info:
   title: GopherHub API
   version: "1.0"
 paths:
+  /auth/user:
+    post:
+      consumes:
+      - application/json
+      description: Register a user
+      parameters:
+      - description: User credentials
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/main.RegisterUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered
+          schema:
+            $ref: '#/definitions/store.User'
+        "400":
+          description: Bad Request
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      summary: Register a user
+      tags:
+      - auth
   /feed:
     get:
       consumes:

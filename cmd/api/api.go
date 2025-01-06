@@ -86,6 +86,11 @@ func (app *app) mux() http.Handler {
 		r.Group(func(r chi.Router) {
 			r.Get("/feed", app.getUserFeedHandler)
 		})
+
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/user", app.registerUserHandler)
+			r.Post("/login", app.loginUserHandler)
+		})
 	})
 
 	return r
