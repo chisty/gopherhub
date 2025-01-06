@@ -17,6 +17,25 @@ type PaginatedFeedRequest struct {
 	Until  string   `json:"until"`
 }
 
+// getUserFeedHandler godoc
+//
+//	@Summary		Fetches the user feed
+//	@Description	Fetches the user feed
+//	@Tags			feed
+//	@Accept			json
+//	@Produce		json
+//	@Param			since	query		string	false	"Since"
+//	@Param			until	query		string	false	"Until"
+//	@Param			limit	query		int		false	"Limit"
+//	@Param			offset	query		int		false	"Offset"
+//	@Param			sort	query		string	false	"Sort"
+//	@Param			tags	query		string	false	"Tags"
+//	@Param			search	query		string	false	"Search"
+//	@Success		200		{object}	[]store.PostWithMetadata
+//	@Failure		400		{object}	error
+//	@Failure		500		{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/feed [get]
 func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("getUserFeedHandler")
 
@@ -30,6 +49,8 @@ func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 		app.badRequestResponse(w, r, err)
 		return
 	}
+
+	log.Println(fq)
 
 	posts, err := app.store.Posts.GetUserFeed(r.Context(), int64(9), fq)
 	if err != nil {

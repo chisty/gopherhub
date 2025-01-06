@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/lib/pq"
 )
@@ -111,6 +112,8 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 }
 
 func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedFeedQuery) ([]PostWithMetadata, error) {
+
+	log.Println("GetUserFeed:", userID)
 
 	query := `SELECT p.id, p.title, p.content, p.user_id, p.tags, p.version, p.created_at,
 			u.username,
