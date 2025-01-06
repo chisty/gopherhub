@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -46,7 +45,7 @@ type CreateCommentRequest struct {
 //	@Security		ApiKeyAuth
 //	@Router			/posts [post]
 func (app *app) createPostHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("createPostHandler")
+	app.logger.Info("createPostHandler")
 
 	ctx := r.Context()
 
@@ -92,7 +91,7 @@ func (app *app) createPostHandler(w http.ResponseWriter, r *http.Request) {
 //	@Security		ApiKeyAuth
 //	@Router			/posts/{id} [get]
 func (app *app) getPostHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("getPostHandler")
+	app.logger.Info("getPostHandler")
 
 	post := getPostFromContext(r)
 
@@ -109,7 +108,7 @@ func (app *app) getPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *app) deletePostHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("deletePostHandler")
+	app.logger.Info("deletePostHandler")
 
 	idParam := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idParam, 10, 64)
@@ -187,7 +186,7 @@ func (app *app) updatePostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *app) createCommentHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("createCommentHandler")
+	app.logger.Info("createCommentHandler")
 
 	post := getPostFromContext(r)
 

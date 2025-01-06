@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -34,7 +33,7 @@ type FollowUser struct {
 //	@Security		ApiKeyAuth
 //	@Router			/users/{id} [get]
 func (app *app) getUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("getUserHandler")
+	app.logger.Info("getUserHandler")
 
 	user := getUserFromContext(r)
 
@@ -57,7 +56,7 @@ func (app *app) getUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Security		ApiKeyAuth
 //	@Router			/users/{id}/follow [put]
 func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("followUserHandler")
+	app.logger.Info("followUserHandler")
 
 	// TODO: implement auth userID from context
 	followerUser := getUserFromContext(r)
@@ -97,7 +96,7 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Security		ApiKeyAuth
 //	@Router			/users/{userID}/unfollow [put]
 func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("unfollowUserHandler")
+	app.logger.Info("unfollowUserHandler")
 
 	followerUser := getUserFromContext(r)
 

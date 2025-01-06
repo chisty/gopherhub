@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/chisty/gopherhub/internal/util"
@@ -38,7 +37,7 @@ type PaginatedFeedRequest struct {
 //	@Security		ApiKeyAuth
 //	@Router			/feed [get]
 func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("getUserFeedHandler")
+	app.logger.Info("getUserFeedHandler")
 
 	fq, err := util.ParsePagination(r)
 	if err != nil {
@@ -50,8 +49,6 @@ func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 		app.badRequestResponse(w, r, err)
 		return
 	}
-
-	log.Println(fq)
 
 	posts, err := app.store.Posts.GetUserFeed(r.Context(), fq)
 	if err != nil {

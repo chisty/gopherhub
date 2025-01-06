@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/chisty/gopherhub/internal/db"
 	"github.com/chisty/gopherhub/internal/env"
 	"github.com/chisty/gopherhub/internal/store"
+	"go.uber.org/zap"
 )
 
 //	@title			GopherHub API
@@ -44,21 +44,28 @@ func main() {
 		version: env.GetString("VERSION", version),
 	}
 
+	// Logger
+
+	logger := zap.Must(zap.NewProduction()).Sugar()
+	defer logger.Sync()
+
+	// Database connection
 	db, err := db.New(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)
 	if err != nil {
-		log.Panic(err)
+		logger.Panic(err)
 	}
 
 	defer db.Close()
-	log.Println("Database connection established")
+	logger.Info("Database connection established")
 
 	storage := store.NewStorage(db)
 
 	app := app{
 		config: cfg,
 		store:  storage,
+		logger: logger,
 	}
 
 	mux := app.mux()
-	log.Fatal(app.run(mux))
+	logger.Fatal(app.run(mux))
 }
