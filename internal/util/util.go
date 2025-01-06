@@ -28,10 +28,16 @@ func ParsePagination(r *http.Request) (store.PaginatedFeedQuery, error) {
 		sort = "desc"
 	}
 
+	userID, err := strconv.Atoi(qs.Get("userID"))
+	if err != nil {
+		return store.PaginatedFeedQuery{}, fmt.Errorf("failed to parse userID: %w", err)
+	}
+
 	pq := store.PaginatedFeedQuery{
 		Limit:  limit,
 		Offset: offset,
 		Sort:   sort,
+		UserID: int64(userID),
 	}
 
 	tags := qs.Get("tags")

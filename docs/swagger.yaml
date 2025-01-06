@@ -154,6 +154,10 @@ paths:
         in: query
         name: search
         type: string
+      - description: User ID
+        in: query
+        name: userID
+        type: integer
       produces:
       - application/json
       responses:

@@ -31,6 +31,7 @@ type PaginatedFeedRequest struct {
 //	@Param			sort	query		string	false	"Sort"
 //	@Param			tags	query		string	false	"Tags"
 //	@Param			search	query		string	false	"Search"
+//	@Param			userID	query		int		false	"User ID"
 //	@Success		200		{object}	[]store.PostWithMetadata
 //	@Failure		400		{object}	error
 //	@Failure		500		{object}	error
@@ -52,7 +53,7 @@ func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(fq)
 
-	posts, err := app.store.Posts.GetUserFeed(r.Context(), int64(9), fq)
+	posts, err := app.store.Posts.GetUserFeed(r.Context(), fq)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

@@ -6,6 +6,7 @@ type PaginatedFeedQuery struct {
 	Sort   string
 	Tags   []string
 	Search string
+	UserID int64
 	Since  string
 	Until  string
 }

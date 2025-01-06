@@ -111,9 +111,9 @@ func (s *PostStore) Update(ctx context.Context, post *Post) error {
 	return nil
 }
 
-func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedFeedQuery) ([]PostWithMetadata, error) {
+func (s *PostStore) GetUserFeed(ctx context.Context, fq PaginatedFeedQuery) ([]PostWithMetadata, error) {
 
-	log.Println("GetUserFeed:", userID)
+	log.Println("GetUserFeed:", fq.UserID)
 
 	query := `SELECT p.id, p.title, p.content, p.user_id, p.tags, p.version, p.created_at,
 			u.username,
@@ -132,7 +132,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedF
 	ctx, cancel := context.WithTimeout(ctx, DBTimeoutDuration)
 	defer cancel()
 
-	rows, err := s.db.QueryContext(ctx, query, userID, fq.Limit, fq.Offset, fq.Search)
+	rows, err := s.db.QueryContext(ctx, query, fq.UserID, fq.Limit, fq.Offset, fq.Search)
 	if err != nil {
 		return nil, err
 	}
