@@ -7,6 +7,7 @@ import (
 
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/util"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -71,6 +72,38 @@ func (app *app) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.jsonResponse(w, http.StatusCreated, user); err != nil {
+		app.internalServerError(w, r, err)
+	}
+}
+
+// activateUserHandler godoc
+//
+//	@Summary		Activate a user
+//	@Description	Activate a user by invitation token
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	path		string	true	"Invitation token"
+//	@Success		204		{string}	string	"User activated"
+//	@Failure		400		{object}	error	"User payload missing"
+//	@Failure		404		{object}	error	"User not found"
+//	@Security		ApiKeyAuth
+//	@Router			/users/activate/{token} [put]
+func (app *app) activateUserHandler(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
+
+	err := app.store.Users.Activate(r.Context(), token)
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			app.notFoundResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+
+	if err := app.jsonResponse(w, http.StatusNoContent, nil); err != nil {
 		app.internalServerError(w, r, err)
 	}
 }

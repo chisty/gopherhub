@@ -77,6 +77,8 @@ func (app *app) mux() http.Handler {
 		})
 
 		r.Route("/users", func(r chi.Router) {
+			r.Put("/activate/{token}", app.activateUserHandler)
+
 			r.Route("/{id}", func(r chi.Router) {
 				r.Use(app.userContextMiddleware)
 
