@@ -42,6 +42,9 @@ func main() {
 		},
 		env:     env.GetString("ENV", "development"),
 		version: env.GetString("VERSION", version),
+		mail: mailConfig{
+			expiry: env.GetDuration("MAIL_EXPIRY", 3*24*time.Hour),
+		},
 	}
 
 	// Logger

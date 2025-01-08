@@ -1,10 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/util"
+	"github.com/google/uuid"
 )
 
 type RegisterUserRequest struct {
@@ -43,10 +46,27 @@ func (app *app) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 		Email:    registerUserPayload.Email,
 	}
 
-	// hash the user password
-
 	if err := user.Password.Set(registerUserPayload.Password); err != nil {
 		app.internalServerError(w, r, err)
+		return
+	}
+
+	// Generate a token for the user
+	plainToken := uuid.New().String()
+	hash := sha256.Sum256([]byte(plainToken))
+	hashToken := hex.EncodeToString(hash[:])
+
+	// Create and invite the user
+	err := app.store.Users.CreateAndInvite(r.Context(), user, hashToken, app.config.mail.expiry)
+	if err != nil {
+		switch err {
+		case store.ErrDuplicateEmail:
+			app.badRequestResponse(w, r, err)
+		case store.ErrDuplicateUsername:
+			app.badRequestResponse(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
 		return
 	}
 

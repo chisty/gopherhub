@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"math/rand"
 
@@ -29,17 +30,20 @@ var postContents = []string{
 	"Write clear and professional emails.", "Simple steps to reduce clutter.", "Practice mindfulness daily.", "Playlists to boost productivity.", "Reduce screen time and stay focused.",
 }
 
-func Seed(store store.Storage) error {
+func Seed(store store.Storage, db *sql.DB) error {
 	ctx := context.Background()
 
 	users := generateUsers(20)
+	tx, _ := db.BeginTx(ctx, nil)
 	for _, user := range users {
-		if err := store.Users.Create(ctx, user); err != nil {
+		if err := store.Users.Create(ctx, tx, user); err != nil {
+			_ = tx.Rollback()
 			log.Println("Error creating user", err)
 			return err
 		}
 	}
 
+	tx.Commit()
 	log.Println("Users created")
 
 	posts := generatePosts(100, users)
@@ -71,7 +75,6 @@ func generateUsers(n int) []*store.User {
 		users[i] = &store.User{
 			Username: usernames[i],
 			Email:    usernames[i] + "@example.com",
-			Password: "password",
 		}
 	}
 	return users

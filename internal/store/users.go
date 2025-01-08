@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -36,15 +37,22 @@ type UserStore struct {
 	db *sql.DB
 }
 
-func (s *UserStore) Create(ctx context.Context, user *User) error {
+func (s *UserStore) Create(ctx context.Context, tx *sql.Tx, user *User) error {
 	query := `INSERT INTO users(username, password, email) VALUES ($1, $2, $3) RETURNING id,created_at`
 
 	ctx, cancel := context.WithTimeout(ctx, DBTimeoutDuration)
 	defer cancel()
 
-	err := s.db.QueryRowContext(ctx, query, user.Username, user.Password, user.Email).Scan(&user.ID, &user.CreatedAt)
+	err := tx.QueryRowContext(ctx, query, user.Username, user.Password.hash, user.Email).Scan(&user.ID, &user.CreatedAt)
 	if err != nil {
-		return err
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_username_key"`:
+			return ErrDuplicateUsername
+		default:
+			return err
+		}
 	}
 
 	return nil
@@ -83,4 +91,34 @@ func (s *UserStore) GetByID(ctx context.Context, id int64) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (s *UserStore) CreateAndInvite(ctx context.Context, user *User, token string, invExpiry time.Duration) error {
+	return withTx(s.db, ctx, func(tx *sql.Tx) error {
+		// create user
+		if err := s.Create(ctx, tx, user); err != nil {
+			return err
+		}
+
+		// create user invitation
+		if err := s.createUserInvitation(ctx, tx, user.ID, token, invExpiry); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (s *UserStore) createUserInvitation(ctx context.Context, tx *sql.Tx, userID int64, token string, invExpiry time.Duration) error {
+	query := `INSERT INTO invitation(token, user_id, expiry) VALUES ($1, $2, $3)`
+
+	ctx, cancel := context.WithTimeout(ctx, DBTimeoutDuration)
+	defer cancel()
+
+	_, err := tx.ExecContext(ctx, query, token, userID, time.Now().Add(invExpiry))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -27,6 +27,11 @@ type config struct {
 	env     string
 	version string
 	apiURL  string
+	mail    mailConfig
+}
+
+type mailConfig struct {
+	expiry time.Duration
 }
 
 type dbConfig struct {
@@ -81,15 +86,14 @@ func (app *app) mux() http.Handler {
 				r.Put("/follow", app.followUserHandler)
 				r.Put("/unfollow", app.unfollowUserHandler)
 			})
-		})
 
-		r.Group(func(r chi.Router) {
-			r.Get("/feed", app.getUserFeedHandler)
+			r.Group(func(r chi.Router) {
+				r.Get("/feed", app.getUserFeedHandler)
+			})
 		})
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/user", app.registerUserHandler)
-			r.Post("/login", app.loginUserHandler)
 		})
 	})
 
