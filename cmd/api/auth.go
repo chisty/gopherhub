@@ -17,6 +17,11 @@ type RegisterUserRequest struct {
 	Password string `json:"password" validate:"required,min=4,max=40"`
 }
 
+type UserWithToken struct {
+	*store.User
+	Token string `json:"token"`
+}
+
 // registerUserHandler godoc
 //
 //	@Summary		Register a user
@@ -25,7 +30,7 @@ type RegisterUserRequest struct {
 //	@Accept			json
 //	@Produce		json
 //	@Param			payload	body		RegisterUserRequest	true	"User credentials"
-//	@Success		201		{object}	store.User			"User registered"
+//	@Success		201		{object}	UserWithToken		"User registered"
 //	@Failure		400		{object}	error
 //	@Failure		500		{object}	error
 //	@Router			/auth/user [post]
@@ -71,7 +76,12 @@ func (app *app) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := app.jsonResponse(w, http.StatusCreated, user); err != nil {
+	userWithToken := &UserWithToken{
+		User:  user,
+		Token: plainToken,
+	}
+
+	if err := app.jsonResponse(w, http.StatusCreated, userWithToken); err != nil {
 		app.internalServerError(w, r, err)
 	}
 }
