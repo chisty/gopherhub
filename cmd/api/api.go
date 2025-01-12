@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/chisty/gopherhub/docs"
+	"github.com/chisty/gopherhub/internal/mailer"
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
@@ -19,6 +20,7 @@ type app struct {
 	config config
 	store  store.Storage
 	logger *zap.SugaredLogger
+	mailer mailer.Client
 }
 
 type config struct {
