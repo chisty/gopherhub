@@ -5,6 +5,7 @@ import (
 
 	"github.com/chisty/gopherhub/internal/db"
 	"github.com/chisty/gopherhub/internal/env"
+	"github.com/chisty/gopherhub/internal/mailer"
 	"github.com/chisty/gopherhub/internal/store"
 	"go.uber.org/zap"
 )
@@ -32,8 +33,9 @@ const version = "0.0.1"
 
 func main() {
 	cfg := config{
-		addr:   env.GetString("ADDR", ":8080"),
-		apiURL: env.GetString("DOCS_URL", "localhost:8080"),
+		addr:        env.GetString("ADDR", ":8080"),
+		apiURL:      env.GetString("DOCS_URL", "localhost:8080"),
+		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:4000"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 20),
@@ -43,7 +45,11 @@ func main() {
 		env:     env.GetString("ENV", "development"),
 		version: env.GetString("VERSION", version),
 		mail: mailConfig{
-			expiry: env.GetDuration("MAIL_EXPIRY", 3*24*time.Hour),
+			sendGridCfg: sendGridConfig{
+				apiKey: env.GetString("SENDGRID_API_KEY", ""),
+			},
+			expiry:    env.GetDuration("MAIL_EXPIRY", 3*24*time.Hour),
+			fromEmail: env.GetString("FROM_EMAIL", ""),
 		},
 	}
 
@@ -63,10 +69,13 @@ func main() {
 
 	storage := store.NewStorage(db)
 
+	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
+
 	app := app{
 		config: cfg,
 		store:  storage,
 		logger: logger,
+		mailer: mailer,
 	}
 
 	mux := app.mux()

@@ -24,16 +24,23 @@ type app struct {
 }
 
 type config struct {
-	addr    string
-	db      dbConfig
-	env     string
-	version string
-	apiURL  string
-	mail    mailConfig
+	addr        string
+	db          dbConfig
+	env         string
+	version     string
+	apiURL      string
+	mail        mailConfig
+	frontendURL string
 }
 
 type mailConfig struct {
-	expiry time.Duration
+	sendGridCfg sendGridConfig
+	fromEmail   string
+	expiry      time.Duration
+}
+
+type sendGridConfig struct {
+	apiKey string
 }
 
 type dbConfig struct {
