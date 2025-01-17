@@ -17,12 +17,15 @@ type SendGridMailer struct {
 	client    *sendgrid.Client
 }
 
-func NewSendGridMailer(fromEmail, apiKey string) *SendGridMailer {
+func NewSendGridMailer(fromEmail, apiKey string) (*SendGridMailer, error) {
+	if apiKey == "" {
+		return nil, fmt.Errorf("sendgrid api key is required")
+	}
 	return &SendGridMailer{
 		fromEmail: fromEmail,
 		apiKey:    apiKey,
 		client:    sendgrid.NewSendClient(apiKey),
-	}
+	}, nil
 }
 
 func (m *SendGridMailer) Send(templateFile, username, email string, data any, isSandbox bool) error {

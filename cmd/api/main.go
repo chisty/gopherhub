@@ -54,7 +54,6 @@ func main() {
 	}
 
 	// Logger
-
 	logger := zap.Must(zap.NewProduction()).Sugar()
 	defer logger.Sync()
 
@@ -69,7 +68,10 @@ func main() {
 
 	storage := store.NewStorage(db)
 
-	mailer := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
+	mailer, err := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
+	if err != nil {
+
+	}
 
 	app := app{
 		config: cfg,
