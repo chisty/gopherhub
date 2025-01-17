@@ -35,7 +35,7 @@ func main() {
 	cfg := config{
 		addr:        env.GetString("ADDR", ":8080"),
 		apiURL:      env.GetString("DOCS_URL", "localhost:8080"),
-		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:4000"),
+		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:5173"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
 			maxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 20),
@@ -50,6 +50,12 @@ func main() {
 			},
 			expiry:    env.GetDuration("MAIL_EXPIRY", 3*24*time.Hour),
 			fromEmail: env.GetString("FROM_EMAIL", ""),
+		},
+		auth: authConfig{
+			basic: basicConfig{
+				username: env.GetString("BASIC_AUTH_USERNAME", "admin"),
+				password: env.GetString("BASIC_AUTH_PASSWORD", "admin"),
+			},
 		},
 	}
 

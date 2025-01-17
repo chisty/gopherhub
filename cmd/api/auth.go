@@ -129,6 +129,7 @@ func (app *app) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 //	@Router			/users/activate/{token} [put]
 func (app *app) activateUserHandler(w http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
+	app.logger.Infow("token from frontend:", "token", token)
 
 	err := app.store.Users.Activate(r.Context(), token)
 	if err != nil {
