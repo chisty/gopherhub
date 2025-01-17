@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/chisty/gopherhub/docs"
+	"github.com/chisty/gopherhub/internal/auth"
 	"github.com/chisty/gopherhub/internal/mailer"
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/util"
@@ -18,10 +19,11 @@ import (
 )
 
 type app struct {
-	config config
-	store  store.Storage
-	logger *zap.SugaredLogger
-	mailer mailer.Client
+	config        config
+	store         store.Storage
+	logger        *zap.SugaredLogger
+	mailer        mailer.Client
+	authenticator auth.Authenticator
 }
 
 type config struct {
@@ -37,6 +39,14 @@ type config struct {
 
 type authConfig struct {
 	basic basicConfig
+	token tokenConfig
+}
+
+type tokenConfig struct {
+	secret   string
+	issuer   string
+	audience string
+	expiry   time.Duration
 }
 
 type basicConfig struct {
@@ -125,6 +135,7 @@ func (app *app) mux() http.Handler {
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/user", app.registerUserHandler)
+			r.Post("/token", app.createTokenHandler)
 		})
 	})
 

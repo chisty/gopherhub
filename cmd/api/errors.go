@@ -26,10 +26,10 @@ func (app *app) conflictResponse(w http.ResponseWriter, r *http.Request, err err
 	util.WriteJSONError(w, http.StatusConflict, err.Error())
 }
 
-// func (app *app) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-// 	app.logger.Errorw("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-// 	util.WriteJSONError(w, http.StatusUnauthorized, err.Error())
-// }
+func (app *app) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logger.Errorw("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
+	util.WriteJSONError(w, http.StatusUnauthorized, err.Error())
+}
 
 func (app *app) unauthorizedBasicErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logger.Errorw("unauthorized error", "method", r.Method, "path", r.URL.Path, "error", err.Error())

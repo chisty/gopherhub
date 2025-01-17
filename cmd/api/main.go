@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/chisty/gopherhub/internal/auth"
 	"github.com/chisty/gopherhub/internal/db"
 	"github.com/chisty/gopherhub/internal/env"
 	"github.com/chisty/gopherhub/internal/mailer"
@@ -56,6 +57,12 @@ func main() {
 				username: env.GetString("BASIC_AUTH_USERNAME", "admin"),
 				password: env.GetString("BASIC_AUTH_PASSWORD", "admin"),
 			},
+			token: tokenConfig{
+				secret:   env.GetString("AUTH_TOKEN_SECRET", "secret"),
+				issuer:   env.GetString("AUTH_TOKEN_ISSUER", "gopherhub"),
+				audience: env.GetString("AUTH_TOKEN_AUDIENCE", "gopherhub"),
+				expiry:   env.GetDuration("AUTH_TOKEN_EXPIRY", 24*time.Hour),
+			},
 		},
 	}
 
@@ -76,14 +83,17 @@ func main() {
 
 	mailer, err := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
 	if err != nil {
-
+		panic(err)
 	}
 
+	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.audience, cfg.auth.token.issuer)
+
 	app := app{
-		config: cfg,
-		store:  storage,
-		logger: logger,
-		mailer: mailer,
+		config:        cfg,
+		store:         storage,
+		logger:        logger,
+		mailer:        mailer,
+		authenticator: jwtAuthenticator,
 	}
 
 	mux := app.mux()
