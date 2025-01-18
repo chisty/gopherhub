@@ -66,6 +66,8 @@ definitions:
         type: integer
       is_active:
         type: boolean
+      role:
+        $ref: '#/definitions/store.Role'
       role_id:
         type: integer
       token:
@@ -144,6 +146,17 @@ definitions:
       version:
         type: integer
     type: object
+  store.Role:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      level:
+        type: integer
+      name:
+        type: string
+    type: object
   store.User:
     properties:
       created_at:
@@ -154,6 +167,8 @@ definitions:
         type: integer
       is_active:
         type: boolean
+      role:
+        $ref: '#/definitions/store.Role'
       role_id:
         type: integer
       username:
@@ -306,7 +321,7 @@ paths:
       summary: Fetches a post
       tags:
       - posts
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates a post by ID

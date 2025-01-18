@@ -87,7 +87,7 @@ func (app *app) AuthBasicMiddleware() func(http.Handler) http.Handler {
 	}
 }
 
-func (app *app) checkPostOwnership(role string, next http.HandlerFunc) http.HandlerFunc {
+func (app *app) checkPostOwnership(requiredRole string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := getUserFromContext(r)
 		post := getPostFromContext(r)
@@ -98,11 +98,25 @@ func (app *app) checkPostOwnership(role string, next http.HandlerFunc) http.Hand
 		}
 
 		allowed, err := app.checkRolePrecedence(r.Context(), user, requiredRole)
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+
+		if !allowed {
+			app.forbiddenResponse(w, r, fmt.Errorf("user does not have required role"))
+			return
+		}
 
 		next.ServeHTTP(w, r)
 	})
 }
 
-func (app *app) checkRolePrecedence(context context.Context, user *store.User, roleName string) (bool, error) {
-	role, err := app.store.Roles.GetByName(context, roleName)
+func (app *app) checkRolePrecedence(ctx context.Context, user *store.User, roleName string) (bool, error) {
+	role, err := app.store.Roles.GetByName(ctx, roleName)
+	if err != nil {
+		return false, err
+	}
+
+	return user.Role.Level >= role.Level, nil
 }
