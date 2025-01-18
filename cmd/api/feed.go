@@ -35,7 +35,7 @@ type PaginatedFeedRequest struct {
 //	@Failure		400		{object}	error
 //	@Failure		500		{object}	error
 //	@Security		ApiKeyAuth
-//	@Router			/feed [get]
+//	@Router			/users/feed [get]
 func (app *app) getUserFeedHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("getUserFeedHandler")
 

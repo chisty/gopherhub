@@ -94,7 +94,7 @@ func (app *app) mux() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.With(app.BasicAuthMiddleware()).Get("/health", app.healthCheckHandler)
+		r.With(app.AuthBasicMiddleware()).Get("/health", app.healthCheckHandler)
 
 		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(
@@ -102,7 +102,7 @@ func (app *app) mux() http.Handler {
 		))
 
 		r.Route("/posts", func(r chi.Router) {
-			r.Use(app.TokenAuthMiddleware)
+			r.Use(app.AuthTokenMiddleware)
 
 			r.Post("/", app.createPostHandler)
 
@@ -121,16 +121,15 @@ func (app *app) mux() http.Handler {
 			r.Put("/activate/{token}", app.activateUserHandler)
 
 			r.Route("/{id}", func(r chi.Router) {
-				r.Use(app.userContextMiddleware)
+				r.Use(app.AuthTokenMiddleware)
 
 				r.Get("/", app.getUserHandler)
-
-				// We can use POST or PUT, but PUT is more appropriate since it is idempotent
 				r.Put("/follow", app.followUserHandler)
 				r.Put("/unfollow", app.unfollowUserHandler)
 			})
 
 			r.Group(func(r chi.Router) {
+				r.Use(app.AuthTokenMiddleware)
 				r.Get("/feed", app.getUserFeedHandler)
 			})
 		})

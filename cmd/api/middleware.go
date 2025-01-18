@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func (app *app) TokenAuthMiddleware(next http.Handler) http.Handler {
+func (app *app) AuthTokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -51,7 +51,7 @@ func (app *app) TokenAuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (app *app) BasicAuthMiddleware() func(http.Handler) http.Handler {
+func (app *app) AuthBasicMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")

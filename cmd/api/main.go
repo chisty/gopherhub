@@ -34,8 +34,8 @@ const version = "0.0.1"
 
 func main() {
 	cfg := config{
-		addr:        env.GetString("ADDR", ":8080"),
-		apiURL:      env.GetString("DOCS_URL", "localhost:8080"),
+		addr:        env.GetString("ADDR", ":8180"),
+		apiURL:      env.GetString("DOCS_URL", "localhost:8180"),
 		frontendURL: env.GetString("FRONTEND_URL", "http://localhost:5173"),
 		db: dbConfig{
 			addr:         env.GetString("DB_ADDR", "postgres://postgres:postgres@localhost:5432/gopherhub?sslmode=disable"),
@@ -47,10 +47,10 @@ func main() {
 		version: env.GetString("VERSION", version),
 		mail: mailConfig{
 			sendGridCfg: sendGridConfig{
-				apiKey: env.GetString("SENDGRID_API_KEY", ""),
+				apiKey: env.GetString("SENDGRID_API_KEY", "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"),
 			},
 			expiry:    env.GetDuration("MAIL_EXPIRY", 3*24*time.Hour),
-			fromEmail: env.GetString("FROM_EMAIL", ""),
+			fromEmail: env.GetString("FROM_EMAIL", "chisty.kaz@gmail.com"),
 		},
 		auth: authConfig{
 			basic: basicConfig{

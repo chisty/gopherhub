@@ -152,5 +152,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, fq PaginatedFeedQuery) ([]P
 		feed = append(feed, detailPost)
 	}
 
+	log.Println(feed)
+
 	return feed, nil
 }

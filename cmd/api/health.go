@@ -13,6 +13,7 @@ import (
 //	@Success		200	{object}	string	"ok"
 //	@Router			/health [get]
 func (app *app) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	app.logger.Info("healthCheckHandler")
 	data := map[string]string{
 		"status":  "ok",
 		"env":     app.config.env,
