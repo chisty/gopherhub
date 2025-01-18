@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/chisty/gopherhub/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -84,4 +85,24 @@ func (app *app) AuthBasicMiddleware() func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func (app *app) checkPostOwnership(role string, next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := getUserFromContext(r)
+		post := getPostFromContext(r)
+
+		if post.UserID == user.ID {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		allowed, err := app.checkRolePrecedence(r.Context(), user, requiredRole)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *app) checkRolePrecedence(context context.Context, user *store.User, roleName string) (bool, error) {
+	role, err := app.store.Roles.GetByName(context, roleName)
 }
