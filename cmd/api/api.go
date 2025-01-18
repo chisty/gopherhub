@@ -102,6 +102,8 @@ func (app *app) mux() http.Handler {
 		))
 
 		r.Route("/posts", func(r chi.Router) {
+			r.Use(app.TokenAuthMiddleware)
+
 			r.Post("/", app.createPostHandler)
 
 			r.Route("/{id}", func(r chi.Router) {
