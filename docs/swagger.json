@@ -649,6 +649,9 @@
                 "is_active": {
                     "type": "boolean"
                 },
+                "role_id": {
+                    "type": "integer"
+                },
                 "token": {
                     "type": "string"
                 },
@@ -779,6 +782,9 @@
                 },
                 "is_active": {
                     "type": "boolean"
+                },
+                "role_id": {
+                    "type": "integer"
                 },
                 "username": {
                     "type": "string"
