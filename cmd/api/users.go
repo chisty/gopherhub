@@ -96,7 +96,7 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("unfollowUserHandler")
 
-	unfollowerUser := getUserFromContext(r)
+	unfollowedUser := getUserFromContext(r)
 
 	unfollowedID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -104,7 +104,7 @@ func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := app.store.Followers.UnFollow(r.Context(), unfollowerUser.ID, unfollowedID); err != nil {
+	if err := app.store.Followers.UnFollow(r.Context(), unfollowedUser.ID, unfollowedID); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
