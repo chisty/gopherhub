@@ -109,6 +109,20 @@ func (app *app) getPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeletePost godoc
+//
+//	@Summary		Deletes a post
+//	@Description	Deletes a post by ID
+//	@Tags			posts
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		int		true	"Post ID"
+//	@Success		204	{string}	string	"Post deleted"
+//	@Failure		400	{object}	error
+//	@Failure		404	{object}	error
+//	@Failure		500	{object}	error
+//	@Security		ApiKeyAuth
+//	@Router			/posts/{id} [delete]
 func (app *app) deletePostHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("deletePostHandler")
 
