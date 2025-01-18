@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/chisty/gopherhub/internal/store"
-	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -58,15 +57,14 @@ func (app *app) getUserHandler(w http.ResponseWriter, r *http.Request) {
 func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("followUserHandler")
 
-	// TODO: implement auth userID from context
 	followerUser := getUserFromContext(r)
-	var payload FollowUser
-	if err := util.ReadJSON(w, r, &payload); err != nil {
+	followedID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
-	if err := app.store.Followers.Follow(r.Context(), payload.UserID, followerUser.ID); err != nil {
+	if err := app.store.Followers.Follow(r.Context(), followerUser.ID, followedID); err != nil {
 		switch err {
 		case store.ErrorConflictDuplicateKey:
 			app.conflictResponse(w, r, err)
@@ -98,16 +96,15 @@ func (app *app) followUserHandler(w http.ResponseWriter, r *http.Request) {
 func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("unfollowUserHandler")
 
-	followerUser := getUserFromContext(r)
+	unfollowerUser := getUserFromContext(r)
 
-	// TODO: implement auth userID from context
-	var payload FollowUser
-	if err := util.ReadJSON(w, r, &payload); err != nil {
+	unfollowedID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
 
-	if err := app.store.Followers.UnFollow(r.Context(), payload.UserID, followerUser.ID); err != nil {
+	if err := app.store.Followers.UnFollow(r.Context(), unfollowerUser.ID, unfollowedID); err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
