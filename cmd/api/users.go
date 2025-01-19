@@ -160,6 +160,10 @@ func getUserFromContext(r *http.Request) *store.User {
 }
 
 func (app *app) GetUser(ctx context.Context, userID int64) (*store.User, error) {
+	if !app.config.redisCfg.enabled {
+		return app.store.Users.GetByID(ctx, userID)
+	}
+
 	app.logger.Infow("fetching user from cache", "user_id", userID)
 
 	user, err := app.cacheStore.Users.Get(ctx, userID)
