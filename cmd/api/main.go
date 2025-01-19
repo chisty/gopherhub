@@ -8,6 +8,7 @@ import (
 	"github.com/chisty/gopherhub/internal/env"
 	"github.com/chisty/gopherhub/internal/mailer"
 	"github.com/chisty/gopherhub/internal/store"
+	"github.com/chisty/gopherhub/internal/store/cache"
 	"go.uber.org/zap"
 )
 
@@ -64,6 +65,12 @@ func main() {
 				expiry:   env.GetDuration("AUTH_TOKEN_EXPIRY", 24*time.Hour),
 			},
 		},
+		redisCfg: redisConfig{
+			addr:    env.GetString("REDIS_ADDR", "localhost:6379"),
+			pw:      env.GetString("REDIS_PW", ""),
+			db:      env.GetInt("REDIS_DB", 0),
+			enabled: true,
+		},
 	}
 
 	// Logger
@@ -79,7 +86,12 @@ func main() {
 	defer db.Close()
 	logger.Info("Database connection established")
 
+	// Cache
+	redisClient := cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
+	logger.Info("Redis connection established")
+
 	storage := store.NewStorage(db)
+	cacheStorage := cache.NewRedisStorage(redisClient)
 
 	mailer, err := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
 	if err != nil {
@@ -91,6 +103,7 @@ func main() {
 	app := app{
 		config:        cfg,
 		store:         storage,
+		cacheStore:    cacheStorage,
 		logger:        logger,
 		mailer:        mailer,
 		authenticator: jwtAuthenticator,

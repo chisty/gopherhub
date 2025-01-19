@@ -40,7 +40,7 @@ func (app *app) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		user, err := app.store.Users.GetByID(r.Context(), userID)
+		user, err := app.GetUser(r.Context(), userID)
 		if err != nil {
 			app.unauthorizedErrorResponse(w, r, err)
 			return

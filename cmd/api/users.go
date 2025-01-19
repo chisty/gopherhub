@@ -34,7 +34,23 @@ type FollowUser struct {
 func (app *app) getUserHandler(w http.ResponseWriter, r *http.Request) {
 	app.logger.Info("getUserHandler")
 
-	user := getUserFromContext(r)
+	userID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	user, err := app.GetUser(r.Context(), userID)
+	if err != nil {
+		switch err {
+		case store.ErrNotFound:
+			app.notFoundResponse(w, r, err)
+			return
+		default:
+			app.internalServerError(w, r, err)
+			return
+		}
+	}
 
 	if err := app.jsonResponse(w, http.StatusOK, user); err != nil {
 		app.internalServerError(w, r, err)
@@ -141,4 +157,30 @@ func (app *app) userContextMiddleware(next http.Handler) http.Handler {
 
 func getUserFromContext(r *http.Request) *store.User {
 	return r.Context().Value(userKeyCtx).(*store.User)
+}
+
+func (app *app) GetUser(ctx context.Context, userID int64) (*store.User, error) {
+	app.logger.Infow("fetching user from cache", "user_id", userID)
+
+	user, err := app.cacheStore.Users.Get(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		// fetch from db
+		app.logger.Infow("cache miss! fetching user from db", "user_id", userID)
+
+		user, err = app.store.Users.GetByID(ctx, userID)
+		if err != nil {
+			return nil, err
+		}
+
+		// set in cache
+		if err := app.cacheStore.Users.Set(ctx, user); err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/chisty/gopherhub/internal/auth"
 	"github.com/chisty/gopherhub/internal/mailer"
 	"github.com/chisty/gopherhub/internal/store"
+	"github.com/chisty/gopherhub/internal/store/cache"
 	"github.com/chisty/gopherhub/internal/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,6 +22,7 @@ import (
 type app struct {
 	config        config
 	store         store.Storage
+	cacheStore    cache.Storage
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator
@@ -35,6 +37,14 @@ type config struct {
 	mail        mailConfig
 	frontendURL string
 	auth        authConfig
+	redisCfg    redisConfig
+}
+
+type redisConfig struct {
+	addr    string
+	pw      string
+	db      int
+	enabled bool
 }
 
 type authConfig struct {
