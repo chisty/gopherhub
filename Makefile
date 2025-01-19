@@ -15,6 +15,9 @@ direnv:
 	direnv allow .
 
 
+test:
+	clear && go test -v ./...
+
 migration:
 	migrate create -seq -ext sql -dir $(MIGRATIONS_PATH) $(filter-out $@,$(MAKECMDGOALS))
 
@@ -47,4 +50,4 @@ redis-up:
 	docker run -d --rm --name gopherhub-redis -p 6379:6379 redis:6.2-alpine redis-server --loglevel warning
 
 
-.PHONY: run curl tidy direnv migration migrate-up migrate-down install seed gen-docs add
+.PHONY: run curl tidy direnv migration migrate-up migrate-down install seed gen-docs add test
