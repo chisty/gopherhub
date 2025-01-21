@@ -104,7 +104,8 @@ func (app *app) mux() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Route("/v1", func(r chi.Router) {
-		r.With(app.AuthBasicMiddleware()).Get("/health", app.healthCheckHandler)
+		// r.With(app.AuthBasicMiddleware()).Get("/health", app.healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler)
 
 		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(

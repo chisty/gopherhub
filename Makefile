@@ -50,4 +50,8 @@ redis-up:
 	docker run -d --rm --name gopherhub-redis -p 6379:6379 redis:6.2-alpine redis-server --loglevel warning
 
 
+autocannon:
+	npx autocannon -r 4000 -d 2 -c 10 --renderStatusCodes http://localhost:8180/v1/health
+
+
 .PHONY: run curl tidy direnv migration migrate-up migrate-down install seed gen-docs add test
