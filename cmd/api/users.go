@@ -130,6 +130,7 @@ func (app *app) unfollowUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//lint:ignore U1000 Will be used later
 func (app *app) userContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
