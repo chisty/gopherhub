@@ -7,6 +7,7 @@ import (
 	"github.com/chisty/gopherhub/internal/db"
 	"github.com/chisty/gopherhub/internal/env"
 	"github.com/chisty/gopherhub/internal/mailer"
+	"github.com/chisty/gopherhub/internal/ratelimiter"
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/store/cache"
 	"go.uber.org/zap"
@@ -71,6 +72,11 @@ func main() {
 			db:      env.GetInt("REDIS_DB", 0),
 			enabled: true,
 		},
+		ratelimiterCfg: ratelimiter.Config{
+			RequestPerTimeFrame: env.GetInt("RATE_LIMITER_REQUEST_PER_TIME_FRAME", 20),
+			TimeFrame:           env.GetDuration("RATE_LIMITER_TIME_FRAME", 5*time.Second),
+			Enabled:             true,
+		},
 	}
 
 	// Logger
@@ -88,7 +94,10 @@ func main() {
 
 	// Cache
 	redisClient := cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
+	defer redisClient.Close()
 	logger.Info("Redis connection established")
+
+	ratelimiter := ratelimiter.NewFixedWindowLimiter(cfg.ratelimiterCfg.RequestPerTimeFrame, cfg.ratelimiterCfg.TimeFrame)
 
 	storage := store.NewStorage(db)
 	cacheStorage := cache.NewRedisStorage(redisClient)
@@ -107,6 +116,7 @@ func main() {
 		logger:        logger,
 		mailer:        mailer,
 		authenticator: jwtAuthenticator,
+		rateLimiter:   ratelimiter,
 	}
 
 	mux := app.mux()

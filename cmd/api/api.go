@@ -8,6 +8,7 @@ import (
 	"github.com/chisty/gopherhub/docs"
 	"github.com/chisty/gopherhub/internal/auth"
 	"github.com/chisty/gopherhub/internal/mailer"
+	"github.com/chisty/gopherhub/internal/ratelimiter"
 	"github.com/chisty/gopherhub/internal/store"
 	"github.com/chisty/gopherhub/internal/store/cache"
 	"github.com/chisty/gopherhub/internal/util"
@@ -26,18 +27,20 @@ type app struct {
 	logger        *zap.SugaredLogger
 	mailer        mailer.Client
 	authenticator auth.Authenticator
+	rateLimiter   ratelimiter.Limiter
 }
 
 type config struct {
-	addr        string
-	db          dbConfig
-	env         string
-	version     string
-	apiURL      string
-	mail        mailConfig
-	frontendURL string
-	auth        authConfig
-	redisCfg    redisConfig
+	addr           string
+	db             dbConfig
+	env            string
+	version        string
+	apiURL         string
+	mail           mailConfig
+	frontendURL    string
+	auth           authConfig
+	redisCfg       redisConfig
+	ratelimiterCfg ratelimiter.Config
 }
 
 type redisConfig struct {
@@ -97,6 +100,7 @@ func (app *app) mux() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(app.RateLimiterMiddleware)
 
 	// Set a timeout value on the request context (ctx), that will signal
 	// through ctx.Done() that the request has timed out and further

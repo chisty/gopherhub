@@ -52,6 +52,7 @@ redis-up:
 
 autocannon:
 	npx autocannon -r 4000 -d 2 -c 10 --renderStatusCodes http://localhost:8180/v1/health
+	npx autocannon -r 20 -d 1 -c 1 --renderStatusCodes http://localhost:8180/v1/health
 
 
 .PHONY: run curl tidy direnv migration migrate-up migrate-down install seed gen-docs add test
