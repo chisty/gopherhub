@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"fmt"
 	"net/http"
 	"time"
@@ -100,6 +101,7 @@ func (app *app) mux() http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	// should be before rate limiter
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
@@ -120,6 +122,7 @@ func (app *app) mux() http.Handler {
 	r.Route("/v1", func(r chi.Router) {
 		// r.With(app.AuthBasicMiddleware()).Get("/health", app.healthCheckHandler)
 		r.Get("/health", app.healthCheckHandler)
+		r.With(app.AuthBasicMiddleware()).Get("/debug/vars", expvar.Handler().ServeHTTP)
 
 		swaggerURL := fmt.Sprintf("%s/swagger/doc.json", app.config.addr)
 		r.Get("/swagger/*", httpSwagger.Handler(

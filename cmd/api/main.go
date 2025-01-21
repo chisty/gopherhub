@@ -1,6 +1,8 @@
 package main
 
 import (
+	"expvar"
+	"runtime"
 	"time"
 
 	"github.com/chisty/gopherhub/internal/auth"
@@ -118,6 +120,18 @@ func main() {
 		authenticator: jwtAuthenticator,
 		rateLimiter:   ratelimiter,
 	}
+
+	// Metrics collected
+
+	expvar.NewString("version").Set(version)
+
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
 
 	mux := app.mux()
 	logger.Fatal(app.run(mux))
