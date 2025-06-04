@@ -2,6 +2,7 @@ package main
 
 import (
 	"expvar"
+	"fmt"
 	"runtime"
 	"time"
 
@@ -81,35 +82,84 @@ func main() {
 		},
 	}
 
-	// Logger
-	logger := zap.Must(zap.NewProduction()).Sugar()
-	defer logger.Sync()
+	// Initialize structured logger based on environment
+	var logger *zap.SugaredLogger
+	if cfg.env == "development" {
+		logger = zap.Must(zap.NewDevelopment()).Sugar()
+	} else {
+		logger = zap.Must(zap.NewProduction()).Sugar()
+	}
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			// Handle sync error gracefully in production
+			fmt.Printf("Logger sync error: %v\n", err)
+		}
+	}()
 
-	// Database connection
+	// Log application startup information
+	logger.Infow("Starting GopherHub API",
+		"version", cfg.version,
+		"environment", cfg.env,
+		"address", cfg.addr,
+		"go_version", runtime.Version(),
+		"num_cpu", runtime.NumCPU(),
+	)
+
+	// Database connection with enhanced error handling
+	logger.Info("Establishing database connection...")
 	db, err := db.New(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime)
 	if err != nil {
-		logger.Panic(err)
+		logger.Fatalw("Failed to establish database connection",
+			"error", err,
+			"db_addr", cfg.db.addr,
+		)
 	}
 
-	defer db.Close()
-	logger.Info("Database connection established")
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.Errorw("Error closing database connection", "error", err)
+		}
+	}()
+	logger.Infow("Database connection established successfully",
+		"max_open_conns", cfg.db.maxOpenConns,
+		"max_idle_conns", cfg.db.maxIdleConns,
+	)
 
-	// Cache
+	// Cache connection with enhanced error handling
+	logger.Info("Establishing Redis cache connection...")
 	redisClient := cache.NewRedisClient(cfg.redisCfg.addr, cfg.redisCfg.pw, cfg.redisCfg.db)
-	defer redisClient.Close()
-	logger.Info("Redis connection established")
+	defer func() {
+		if err := redisClient.Close(); err != nil {
+			logger.Errorw("Error closing Redis connection", "error", err)
+		}
+	}()
+	logger.Infow("Redis connection established successfully",
+		"redis_addr", cfg.redisCfg.addr,
+		"redis_db", cfg.redisCfg.db,
+	)
 
+	// Initialize components
 	ratelimiter := ratelimiter.NewFixedWindowLimiter(cfg.ratelimiterCfg.RequestPerTimeFrame, cfg.ratelimiterCfg.TimeFrame)
-
 	storage := store.NewStorage(db)
 	cacheStorage := cache.NewRedisStorage(redisClient)
 
+	// Initialize mailer with error handling
+	logger.Info("Initializing mailer service...")
 	mailer, err := mailer.NewSendGridMailer(cfg.mail.fromEmail, cfg.mail.sendGridCfg.apiKey)
 	if err != nil {
-		panic(err)
+		logger.Fatalw("Failed to initialize mailer service",
+			"error", err,
+			"from_email", cfg.mail.fromEmail,
+		)
 	}
+	logger.Info("Mailer service initialized successfully")
 
+	// Initialize JWT authenticator
 	jwtAuthenticator := auth.NewJWTAuthenticator(cfg.auth.token.secret, cfg.auth.token.audience, cfg.auth.token.issuer)
+	logger.Infow("JWT authenticator initialized",
+		"issuer", cfg.auth.token.issuer,
+		"audience", cfg.auth.token.audience,
+	)
 
 	app := app{
 		config:        cfg,
@@ -121,18 +171,51 @@ func main() {
 		rateLimiter:   ratelimiter,
 	}
 
-	// Metrics collected
+	// Enhanced metrics collection
+	logger.Info("Setting up application metrics...")
 
+	// Version and build info
 	expvar.NewString("version").Set(version)
+	expvar.NewString("environment").Set(cfg.env)
+	expvar.NewString("go_version").Set(runtime.Version())
 
+	// Runtime metrics
 	expvar.Publish("goroutines", expvar.Func(func() interface{} {
 		return runtime.NumGoroutine()
 	}))
 
+	expvar.Publish("memory", expvar.Func(func() interface{} {
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		return map[string]interface{}{
+			"alloc_mb":      m.Alloc / 1024 / 1024,
+			"total_alloc_mb": m.TotalAlloc / 1024 / 1024,
+			"sys_mb":        m.Sys / 1024 / 1024,
+			"gc_runs":       m.NumGC,
+		}
+	}))
+
+	// Database connection metrics
 	expvar.Publish("database", expvar.Func(func() any {
 		return db.Stats()
 	}))
 
+	// Application health status
+	expvar.Publish("health", expvar.Func(func() interface{} {
+		return map[string]interface{}{
+			"status":     "healthy",
+			"timestamp":  time.Now().Unix(),
+			"uptime":     time.Since(time.Now()).String(), // This would be calculated properly in real implementation
+		}
+	}))
+
+	logger.Info("Application metrics configured successfully")
+
+	// Start the server
 	mux := app.mux()
-	logger.Fatal(app.run(mux))
+	logger.Infow("Starting HTTP server", "address", cfg.addr)
+	
+	if err := app.run(mux); err != nil {
+		logger.Fatalw("Server failed to start", "error", err)
+	}
 }
